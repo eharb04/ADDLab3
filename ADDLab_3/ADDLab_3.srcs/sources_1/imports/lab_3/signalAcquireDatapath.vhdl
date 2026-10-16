@@ -42,15 +42,15 @@ architecture behavior of signalAcquire_Datapath is
     signal longCount: STD_LOGIC_VECTOR (23 downto 0);
     
 begin
-    REG_FILE_COUNTER_CW <= cw[REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX];
-    SHORT_DELAY_COUNTER_CW <= cw[SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX];
-    LONG_DELAY_COUNTER_CW <= cw[LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX];
+    REG_FILE_COUNTER_CW <= cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX);
+    SHORT_DELAY_COUNTER_CW <= cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX);
+    LONG_DELAY_COUNTER_CW <= cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX);
     
     sw <= LONG_DELAY_DONE_SW & SHORT_DELAY_DONE_SW & ALL_CHANNELS_HAVE_BEEN_READ_SW;
     
 
     regFileNumCount: genericCounter
-        GENERIC MAP(4);
+        GENERIC MAP(4)
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => REG_FILE_COUNTER_CW,
@@ -59,7 +59,7 @@ begin
                  );
 
 	regFileNumComp: genericCompare
-        GENERIC MAP(4);
+        GENERIC MAP(4)
         PORT MAP(x => "0111",
                  y => regFileNum,
                  g => open,
@@ -68,7 +68,7 @@ begin
                  );
                  
     shortCount: genericCounter
-        GENERIC MAP(SHORT_DELAY_50Mhz_CONST_WIDTH);
+        GENERIC MAP(SHORT_DELAY_50Mhz_CONST_WIDTH)
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => SHORT_DELAY_COUNTER_CW,
@@ -77,7 +77,7 @@ begin
                  );
 
 	shortComp: genericCompare
-        GENERIC MAP(SHORT_DELAY_50Mhz_CONST_WIDTH);
+        GENERIC MAP(SHORT_DELAY_50Mhz_CONST_WIDTH)
         PORT MAP(x => shortCount,
                  y => SHORT_DELAY_50Mhz_COUNTS,
                  g => open,
@@ -86,7 +86,7 @@ begin
                  );
                  
     longCount: genericCounter
-        GENERIC MAP(LONG_DELAY_50Mhz_CONST_WIDTH);
+        GENERIC MAP(LONG_DELAY_50Mhz_CONST_WIDTH)
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => LONG_DELAY_COUNTER_CW,
@@ -95,7 +95,7 @@ begin
                  );
 
 	longComp: genericCompare
-        GENERIC MAP(LONG_DELAY_50Mhz_CONST_WIDTH);
+        GENERIC MAP(LONG_DELAY_50Mhz_CONST_WIDTH)
         PORT MAP(x => longCount,
                  y => LONG_DELAY_50Mhz_COUNTS,
                  g => open,
@@ -104,15 +104,15 @@ begin
                  );
                  
     regFile: generic8RegisterFile
-        GENERIC MAP(16); --Data is 16 bits
-        port (clk => clk,
-              resetn => resetn,
-              write => REF_FILE_WRITE_CW_BIT_INDEX,
-              wrAddr => regFileNum[2 downto 0],
-              rdAddr => rfAddr,
-              D => an7606data,
-              Q => rfData
-              );
+        GENERIC MAP(16) --Data is 16 bits
+        PORT MAP (clk => clk,
+                  resetn => resetn,
+                  write => REF_FILE_WRITE_CW_BIT_INDEX,
+                  wrAddr => regFileNum(2 downto 0),
+                  rdAddr => rfAddr,
+                  D => an7606data,
+                  Q => rfData
+                  );
                  
      
 

@@ -125,11 +125,25 @@ begin
     --
     -- LPT: Add the truth table for any BBB which are used in the datapath
     --  counter control     Function
+    --  c   Function
+    --  00  Hold
+    --  01  load
+    --  10  inc
+    --  11  reset
     -------------------------------------------------------------------------------
 	output_process: process (state)
 	begin
 	    case state is
-                when RESET_STATE =>    cw <= <complete>;
+            when RESET_STATE => 
+                cw(CONVST_CW_BIT_INDEX) <= '1';
+                cw(RD_CW_BIT_INDEX) <= '1';
+                cw[CS_CW_BIT_INDEX] <= 1;
+                cw[RESET_AD7606_CW_BIT_INDEX] <= 1; --active high
+                cw[REG_FILE_WRITE_CW_BIT_INDEX] <= 0;
+                cw[REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX] <= "11";
+                cw[SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX] <= "11";
+                cw[LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX] <= "11";
+                    
 
  		<complete>
 
