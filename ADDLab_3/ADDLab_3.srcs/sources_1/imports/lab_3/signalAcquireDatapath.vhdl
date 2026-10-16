@@ -56,7 +56,7 @@ begin
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => REG_FILE_COUNTER_CW,
-                 d => "00",
+                 d => (others => '0'),
                  q => regFileNum
                  );
 
@@ -74,7 +74,7 @@ begin
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => SHORT_DELAY_COUNTER_CW,
-                 d => "00",
+                 d => (others => '0'),
                  q => shortCount
                  );
 
@@ -92,7 +92,7 @@ begin
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => LONG_DELAY_COUNTER_CW,
-                 d => "00",
+                 d => (others => '0'),
                  q => longCount
                  );
 

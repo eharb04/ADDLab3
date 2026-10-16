@@ -100,6 +100,7 @@ begin
     an7606rd <= cw(RD_CW_BIT_INDEX);
     an7606cs <= cw(CS_CW_BIT_INDEX);
     an7606reset <= cw(RESET_AD7606_CW_BIT_INDEX);
+    an7606od <= "000"; --hard coded
     sw(BUSY_SW_BIT_INDEX) <= an7606busy;
     
     button_process: process(clk)  
@@ -114,8 +115,5 @@ begin
 			btnPrev <= btnCurr;
 	    end if;
 	end process;
-
-
-	an7606od <= "000"; --hard coded
  
 end behavior;

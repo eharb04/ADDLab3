@@ -7,6 +7,12 @@ set_property IOSTANDARD LVCMOS33 [get_ports resetn]
 
 set_property PACKAGE_PIN M14 [get_ports reg0Magnitude[0]]
 set_property IOSTANDARD LVCMOS33 [get_ports reg0Magnitude[0]]
+set_property PACKAGE_PIN M15 [get_ports reg0Magnitude[1]]
+set_property IOSTANDARD LVCMOS33 [get_ports reg0Magnitude[1]]
+set_property PACKAGE_PIN K16 [get_ports reg0Magnitude[2]]
+set_property IOSTANDARD LVCMOS33 [get_ports reg0Magnitude[2]]
+set_property PACKAGE_PIN J16 [get_ports reg0Magnitude[3]]
+set_property IOSTANDARD LVCMOS33 [get_ports reg0Magnitude[3]]
 
 set_property PACKAGE_PIN R17 [get_ports btn[0]]
 set_property IOSTANDARD LVCMOS33 [get_ports btn[0]]
