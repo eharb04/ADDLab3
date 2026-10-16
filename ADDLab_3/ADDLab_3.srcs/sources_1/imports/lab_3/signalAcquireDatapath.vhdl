@@ -21,6 +21,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.signalAcquire_Package.all;			-- include the basic building block library
+use work.basicBuildingBlocks_package.ALL; -- Component entities
 
 entity signalAcquire_Datapath is
     PORT ( clk : in  STD_LOGIC;
@@ -42,10 +43,10 @@ architecture behavior of signalAcquire_Datapath is
     
 begin
     REG_FILE_COUNTER_CW <= cw[REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX];
-    SHORT_DELAY_COUNTER_CW <= cw[SHORT_DELAY_COUNTER_CW + 1 downto SHORT_DELAY_COUNTER_CW];
-    LONG_DELAY_COUNTER_CW <= cw[LONG_DELAY_COUNTER_CW + 1 downto LONG_DELAY_COUNTER_CW];
+    SHORT_DELAY_COUNTER_CW <= cw[SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX];
+    LONG_DELAY_COUNTER_CW <= cw[LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX];
     
-    sw <= ALL_CHANNELS_HAVE_BEEN_READ_SW & SHORT_DELAY_DONE_SW & LONG_DELAY_DONE_SW;
+    sw <= LONG_DELAY_DONE_SW & SHORT_DELAY_DONE_SW & ALL_CHANNELS_HAVE_BEEN_READ_SW;
     
 
     regFileNumCount: genericCounter
