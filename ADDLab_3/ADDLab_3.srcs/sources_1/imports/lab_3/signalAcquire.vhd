@@ -17,7 +17,8 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use work.signalAcquire_Package.all;	
+use work.signalAcquire_Package.ALL;	
+use work.basicBuildingBlocks_package.ALL;
 					-- Include any packages that are instantiated
 
 
@@ -59,6 +60,11 @@ begin
                  );
                  
     btnCurr <= btn(0);
+    an7606convst <= cw(CONVST_CW_BIT_INDEX);
+    an7606rd <= cw(RD_CW_BIT_INDEX);
+    an7606cs <= cw(CS_CW_BIT_INDEX);
+    an7606reset <= cw(RESET_AD7606_CW_BIT_INDEX);
+    sw(BUSY_SW_BIT_INDEX) <= an7606busy;
     
     button_process: process(clk)  
 	begin
@@ -66,9 +72,9 @@ begin
 			if (resetn = '0') then 
 				btnCurr <= '1';
 				btnPrev <= '1';
-			else 
-			    sw(START_CONV_SW_BIT_INDEX) <= btnCurr xor btnPrev;
 			end if;
+			sw(START_CONV_SW_BIT_INDEX) <= '1' when (btnCurr = '1' and btnPrev = '0')
+			                               else '0';
 			btnPrev <= btnCurr;
 	    end if;
 	end process;
