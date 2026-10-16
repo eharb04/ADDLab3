@@ -20,12 +20,12 @@
 ------------------------------------------------------------------------- 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-<complete>				-- include the basic building block library
+use work.signalAcquire_Package.all;			-- include the basic building block library
 
 entity signalAcquire_Datapath is
     PORT ( clk : in  STD_LOGIC;
            resetn : in  STD_LOGIC;
-		   cw : in STD_LOGIC_VECTOR(CW_WIDTH -1 downto 0);
+		   cw : in STD_LOGIC_VECTOR(CW_WIDTH - 1 downto 0);
 		   sw : out STD_LOGIC_VECTOR(DATAPATH_SW_WIDTH - 1 downto 0);
 		   an7606data: in STD_LOGIC_VECTOR(15 downto 0);
 		   rfAddr: in STD_LOGIC_VECTOR(2 downto 0);
@@ -33,11 +33,16 @@ entity signalAcquire_Datapath is
 end signalAcquire_Datapath;
 
 architecture behavior of signalAcquire_Datapath is
-
-  	<complete>
-
+    
+    signal ALL_CHANNELS_HAVE_BEEN_READ_SW, SHORT_DELAY_DONE_SW, LONG_DELAY_DONE_SW: STD_LOGIC;
+    signal SHORT_DELAY_COUNTER_CW, LONG_DELAY_COUNTER_CW, REG_FILE_COUNTER_CW: STD_LOGIC_VECTOR(1 downto 0);
+    signal regFileNum, shortCount, longCount: STD_LOGIC;
+    
 begin
-
-	<complete>
-
+    ALL_CHANNELS_HAVE_BEEN_READ_SW <= cw(ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX);
+    SHORT_DELAY_DONE_SW <= cw(SHORT_DELAY_DONE_SW_BIT_INDEX);
+    LONG_DELAY_DONE_SW <= cw(LONG_DELAY_DONE_SW_BIT_INDEX);
+    
+    sw <= ALL_CHANNELS_HAVE_BEEN_READ_SW & SHORT_DELAY_DONE_SW & LONG_DELAY_DONE_SW;
+    
 end behavior;

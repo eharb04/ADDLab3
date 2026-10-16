@@ -39,7 +39,10 @@ begin
 
     -- defining intuitive names for the status word bits to make interperting the
     -- logic in the state_process much easier and thus, you'll make fewer errors.
-    SHORT_DELAY_DONE_SW <= sw(SHORT_DELAY_DONE_SW_BIT_INDEX);
+    ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX <= sw(ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX);
+    SHORT_DELAY_DONE_SW_ <= sw(SHORT_DELAY_DONE_SW_BIT_INDEX );
+    LONG_DELAY_DONE_SW <= sw(LONG_DELAY_DONE_SW_BIT_INDEX);
+
     
 	-------------------------------------------------------------------------------
 	-------------------------------------------------------------------------------
