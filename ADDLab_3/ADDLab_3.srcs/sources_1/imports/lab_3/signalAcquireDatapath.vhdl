@@ -116,6 +116,5 @@ begin
                   Q => rfData
                   );
                  
-     
 
 end behavior;

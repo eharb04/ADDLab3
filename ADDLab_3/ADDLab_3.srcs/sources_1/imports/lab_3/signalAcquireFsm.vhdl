@@ -34,8 +34,7 @@ architecture Behavioral of signalAcquire_Fsm is
 	signal state: state_type;
 	
 	signal ALL_CHANNELS_HAVE_BEEN_READ_SW, SHORT_DELAY_DONE_SW, LONG_DELAY_DONE_SW: STD_LOGIC;
-    signal BUSY_SW: STD_LOGIC;
-    signal BTN_PREV, BTN_CURR, BTN_CHANGE: STD_LOGIC;
+    signal BTN_PRESS, BUSY_SW: STD_LOGIC;
 begin
 
     -- defining intuitive names for the status word bits to make interperting the
@@ -43,8 +42,8 @@ begin
     ALL_CHANNELS_HAVE_BEEN_READ_SW <= sw(ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX);
     SHORT_DELAY_DONE_SW <= sw(SHORT_DELAY_DONE_SW_BIT_INDEX);
     LONG_DELAY_DONE_SW <= sw(LONG_DELAY_DONE_SW_BIT_INDEX);
+    BTN_PRESS <= sw(START_CONV_SW_BIT_INDEX);
     BUSY_SW <= sw(BUSY_SW_BIT_INDEX);
-    BTN_CHANGE <= BTN_PREV xor BTN_CURR; --If state has change
 
     
 	-------------------------------------------------------------------------------
@@ -71,12 +70,7 @@ begin
 				        end if;
 				        
 				    when WAIT_TRIGGER_STATE =>
-				        if (BTN_CHANGE = '1') then
-				            state <= WAIT_BUTTON_STATE;
-				        end if;
-				        
-				    when WAIT_BUTTON_STATE =>
-				        if (BTN_CHANGE = '1') then
+				        if (BTN_PRESS = '1') then
 				            state <= ASSERT_CONVSTART_STATE;
 				        end if;
 				        
