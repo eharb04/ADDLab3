@@ -36,7 +36,9 @@ architecture behavior of signalAcquire_Datapath is
     
     signal ALL_CHANNELS_HAVE_BEEN_READ_SW, SHORT_DELAY_DONE_SW, LONG_DELAY_DONE_SW: STD_LOGIC;
     signal SHORT_DELAY_COUNTER_CW, LONG_DELAY_COUNTER_CW, REG_FILE_COUNTER_CW: STD_LOGIC_VECTOR(1 downto 0);
-    signal regFileNum, shortCount, longCount: STD_LOGIC;
+    signal regFileNum: STD_LOGIC_VECTOR (3 downto 0);
+    signal shortCount: STD_LOGIC_VECTOR (7 downto 0);
+    signal longCount: STD_LOGIC_VECTOR (23 downto 0);
     
 begin
     ALL_CHANNELS_HAVE_BEEN_READ_SW <= cw(ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX);
