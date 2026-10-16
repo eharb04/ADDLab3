@@ -21,6 +21,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.signalAcquire_Package.all;			-- include the basic building block library
+use work.basicBuildingBlocks_package.ALL; -- Component entities
 
 entity signalAcquire_Datapath is
     PORT ( clk : in  STD_LOGIC;
@@ -36,47 +37,49 @@ architecture behavior of signalAcquire_Datapath is
     
     signal ALL_CHANNELS_HAVE_BEEN_READ_SW, SHORT_DELAY_DONE_SW, LONG_DELAY_DONE_SW: STD_LOGIC;
     signal SHORT_DELAY_COUNTER_CW, LONG_DELAY_COUNTER_CW, REG_FILE_COUNTER_CW: STD_LOGIC_VECTOR(1 downto 0);
+    signal REG_FILE_WRITE_CW: STD_LOGIC;
     signal regFileNum: STD_LOGIC_VECTOR (3 downto 0);
     signal shortCount: STD_LOGIC_VECTOR (7 downto 0);
     signal longCount: STD_LOGIC_VECTOR (23 downto 0);
     
 begin
-    REG_FILE_COUNTER_CW <= cw[REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX];
-    SHORT_DELAY_COUNTER_CW <= cw[SHORT_DELAY_COUNTER_CW + 1 downto SHORT_DELAY_COUNTER_CW];
-    LONG_DELAY_COUNTER_CW <= cw[LONG_DELAY_COUNTER_CW + 1 downto LONG_DELAY_COUNTER_CW];
+    REG_FILE_COUNTER_CW <= cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX);
+    SHORT_DELAY_COUNTER_CW <= cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX);
+    LONG_DELAY_COUNTER_CW <= cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX);
+    REG_FILE_WRITE_CW <= cw(REG_FILE_WRITE_CW_BIT_INDEX);
     
-    sw <= ALL_CHANNELS_HAVE_BEEN_READ_SW & SHORT_DELAY_DONE_SW & LONG_DELAY_DONE_SW;
+    sw <= LONG_DELAY_DONE_SW & SHORT_DELAY_DONE_SW & ALL_CHANNELS_HAVE_BEEN_READ_SW;
     
 
     regFileNumCount: genericCounter
-        GENERIC MAP(4);
+        GENERIC MAP(4)
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => REG_FILE_COUNTER_CW,
-                 d => "00",
+                 d => (others => '0'),
                  q => regFileNum
                  );
 
 	regFileNumComp: genericCompare
-        GENERIC MAP(4);
+        GENERIC MAP(4)
         PORT MAP(x => "0111",
                  y => regFileNum,
                  g => open,
                  l => open,
-                 e => ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX
+                 e => ALL_CHANNELS_HAVE_BEEN_READ_SW
                  );
                  
-    shortCount: genericCounter
-        GENERIC MAP(SHORT_DELAY_50Mhz_CONST_WIDTH);
+    shortCounter: genericCounter
+        GENERIC MAP(SHORT_DELAY_50Mhz_CONST_WIDTH)
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => SHORT_DELAY_COUNTER_CW,
-                 d => "00",
+                 d => (others => '0'),
                  q => shortCount
                  );
 
 	shortComp: genericCompare
-        GENERIC MAP(SHORT_DELAY_50Mhz_CONST_WIDTH);
+        GENERIC MAP(SHORT_DELAY_50Mhz_CONST_WIDTH)
         PORT MAP(x => shortCount,
                  y => SHORT_DELAY_50Mhz_COUNTS,
                  g => open,
@@ -84,17 +87,17 @@ begin
                  e => SHORT_DELAY_DONE_SW
                  );
                  
-    longCount: genericCounter
-        GENERIC MAP(LONG_DELAY_50Mhz_CONST_WIDTH);
+    longCounter: genericCounter
+        GENERIC MAP(LONG_DELAY_50Mhz_CONST_WIDTH)
         PORT MAP(clk => clk,
                  resetn => resetn,
                  c => LONG_DELAY_COUNTER_CW,
-                 d => "00",
+                 d => (others => '0'),
                  q => longCount
                  );
 
 	longComp: genericCompare
-        GENERIC MAP(LONG_DELAY_50Mhz_CONST_WIDTH);
+        GENERIC MAP(LONG_DELAY_50Mhz_CONST_WIDTH)
         PORT MAP(x => longCount,
                  y => LONG_DELAY_50Mhz_COUNTS,
                  g => open,
@@ -103,16 +106,15 @@ begin
                  );
                  
     regFile: generic8RegisterFile
-        GENERIC MAP(16); --Data is 16 bits
-        port (clk => clk,
-              resetn => resetn,
-              write => REF_FILE_WRITE_CW_BIT_INDEX,
-              wrAddr => regFileNum[2 downto 0],
-              rdAddr => rfAddr,
-              D => an7606data,
-              Q => rfData
-              );
+        GENERIC MAP(16) --Data is 16 bits
+        PORT MAP (clk => clk,
+                  resetn => resetn,
+                  write => REG_FILE_WRITE_CW,
+                  wrAddr => regFileNum(2 downto 0),
+                  rdAddr => rfAddr,
+                  D => an7606data,
+                  Q => rfData
+                  );
                  
-     
 
 end behavior;

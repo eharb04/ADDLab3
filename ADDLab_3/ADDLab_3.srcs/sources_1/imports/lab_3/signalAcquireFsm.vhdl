@@ -33,29 +33,80 @@ architecture Behavioral of signalAcquire_Fsm is
 
 	signal state: state_type;
 	
-	signal SHORT_DELAY_DONE_SW, <complete>;
-
+	signal ALL_CHANNELS_HAVE_BEEN_READ_SW, SHORT_DELAY_DONE_SW, LONG_DELAY_DONE_SW: STD_LOGIC;
+    signal BTN_PRESS, BUSY_SW: STD_LOGIC;
 begin
 
     -- defining intuitive names for the status word bits to make interperting the
     -- logic in the state_process much easier and thus, you'll make fewer errors.
-    ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX <= sw(ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX);
-    SHORT_DELAY_DONE_SW_ <= sw(SHORT_DELAY_DONE_SW_BIT_INDEX );
+    ALL_CHANNELS_HAVE_BEEN_READ_SW <= sw(ALL_CHANNELS_HAVE_BEEN_READ_SW_BIT_INDEX);
+    SHORT_DELAY_DONE_SW <= sw(SHORT_DELAY_DONE_SW_BIT_INDEX);
     LONG_DELAY_DONE_SW <= sw(LONG_DELAY_DONE_SW_BIT_INDEX);
+    BTN_PRESS <= sw(START_CONV_SW_BIT_INDEX);
+    BUSY_SW <= sw(BUSY_SW_BIT_INDEX);
 
     
 	-------------------------------------------------------------------------------
 	-------------------------------------------------------------------------------
-	state_proces: process(clk)  
+	state_process: process(clk)  
 	begin
 		if (rising_edge(clk)) then
 			if (resetn = '0') then 
 				state <= RESET_STATE;
 			else 
 				case state is
-
-				<complete>
-
+				    
+				    when RESET_STATE =>
+				        state <= LONG_DELAY_STATE;
+				        
+				    when LONG_DELAY_STATE => --Switch when long delay is done
+				        if (LONG_DELAY_DONE_SW = '1') then
+				            state <= RESET_AD7606_STATE;
+				        end if;
+				        
+				    when RESET_AD7606_STATE =>
+				        if (SHORT_DELAY_DONE_SW = '1') then
+				            state <= WAIT_TRIGGER_STATE;
+				        end if;
+				        
+				    when WAIT_TRIGGER_STATE =>
+				        if (BTN_PRESS = '1') then
+				            state <= ASSERT_CONVSTART_STATE;
+				        end if;
+				        
+				    when ASSERT_CONVSTART_STATE =>
+				        if (SHORT_DELAY_DONE_SW = '1') then
+				            state <= WAIT_BUSY0_STATE;
+				        end if;
+				        
+				    when WAIT_BUSY0_STATE =>
+				        if (BUSY_SW = '1') then
+				            state <= WAIT_BUSY1_STATE;
+				        end if;
+				        
+				    when WAIT_BUSY1_STATE =>
+				        if (BUSY_SW = '0') then
+				            state <= WAIT_VALID_DATA_STATE;
+				        end if;
+				        
+				    when WAIT_VALID_DATA_STATE =>
+				        if (ALL_CHANNELS_HAVE_BEEN_READ_SW = '1') then
+				            state <= WAIT_TRIGGER_STATE;
+				        elsif (SHORT_DELAY_DONE_SW = '1') then
+				            state <= LATCH_STATE;
+				        end if;
+				        
+				    when LATCH_STATE =>
+				        state <= PAUSE_BETWEEN_CHANNELS_STATE;
+				        
+				    when PAUSE_BETWEEN_CHANNELS_STATE =>
+				        if (SHORT_DELAY_DONE_SW = '1') then
+				            state <= CLEAR_SHORT_COUNTER_STATE;
+				        end if;
+				        
+				    when CLEAR_SHORT_COUNTER_STATE =>
+				        state <= WAIT_VALID_DATA_STATE;
+				        
 				end case;
 			end if;
 		end if;
@@ -67,14 +118,125 @@ begin
     --
     -- LPT: Add the truth table for any BBB which are used in the datapath
     --  counter control     Function
+    --  c   Function
+    --  00  Hold
+    --  01  load
+    --  10  inc
+    --  11  reset
     -------------------------------------------------------------------------------
 	output_process: process (state)
 	begin
 	    case state is
-                when RESET_STATE =>    cw <= <complete>;
+            when RESET_STATE => 
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1';
+                cw(CS_CW_BIT_INDEX)             <= '1';
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0'; --active high
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "11";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "11";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "11";
+                  
+            when LONG_DELAY_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1';
+                cw(CS_CW_BIT_INDEX)             <= '1';
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "11";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "10";
+                
+            when RESET_AD7606_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1';
+                cw(CS_CW_BIT_INDEX)             <= '1';
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '1';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "10";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+            
+            when WAIT_TRIGGER_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1';
+                cw(CS_CW_BIT_INDEX)             <= '1';
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "00";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+                            
+            when ASSERT_CONVSTART_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '0'; --active low
+                cw(RD_CW_BIT_INDEX)             <= '1';
+                cw(CS_CW_BIT_INDEX)             <= '1';
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "10";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+            
+            when WAIT_BUSY0_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1';
+                cw(CS_CW_BIT_INDEX)             <= '1';
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "00";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+                
+            when WAIT_BUSY1_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1';
+                cw(CS_CW_BIT_INDEX)             <= '1';
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "11";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+                
+            when WAIT_VALID_DATA_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '0'; --active low
+                cw(CS_CW_BIT_INDEX)             <= '0'; --active low
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "10";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
 
- 		<complete>
-
+            when LATCH_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1'; --active low
+                cw(CS_CW_BIT_INDEX)             <= '0'; --active low
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '1'; --read to register
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "10";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "11";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+                
+            when PAUSE_BETWEEN_CHANNELS_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1'; --active low
+                cw(CS_CW_BIT_INDEX)             <= '0'; --active low
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "10";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+                
+            when CLEAR_SHORT_COUNTER_STATE =>
+                cw(CONVST_CW_BIT_INDEX)         <= '1';
+                cw(RD_CW_BIT_INDEX)             <= '1'; --active low
+                cw(CS_CW_BIT_INDEX)             <= '0'; --active low
+                cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
+                cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
+                cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "11";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+                
 		end case;
 	end process;
 
