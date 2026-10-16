@@ -59,6 +59,42 @@ begin
                  cw => cw
                  );
                  
+    comp066V: genericCompare
+        GENERIC MAP(16)
+        PORT MAP(x => FIRST_THRESHOLD_CONSTANT,
+                 y => rfData,
+                 g => reg0Magnitude(0),
+                 l => open,
+                 e => open
+                 );
+                 
+    comp132V: genericCompare
+        GENERIC MAP(16)
+        PORT MAP(x => SECOND_THRESHOLD_CONSTANT,
+                 y => rfData,
+                 g => reg0Magnitude(1),
+                 l => open,
+                 e => open
+                 );
+                 
+    comp198V: genericCompare
+        GENERIC MAP(16)
+        PORT MAP(x => THIRD_THRESHOLD_CONSTANT,
+                 y => rfData,
+                 g => reg0Magnitude(2),
+                 l => open,
+                 e => open
+                 );
+                 
+    comp264V: genericCompare
+        GENERIC MAP(16)
+        PORT MAP(x => FOURTH_THRESHOLD_CONSTANT,
+                 y => rfData,
+                 g => reg0Magnitude(3),
+                 l => open,
+                 e => open
+                 );
+                 
     btnCurr <= btn(0);
     an7606convst <= cw(CONVST_CW_BIT_INDEX);
     an7606rd <= cw(RD_CW_BIT_INDEX);
