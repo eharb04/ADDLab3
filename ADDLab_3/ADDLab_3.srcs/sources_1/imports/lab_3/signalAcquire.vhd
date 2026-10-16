@@ -17,6 +17,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use work.signalAcquire_Package.all;	
 					-- Include any packages that are instantiated
 
 
@@ -33,12 +34,46 @@ end signalAcquire;
 
 architecture behavior of signalAcquire is
 
-	<complete>
-	
+    signal sw: STD_LOGIC_VECTOR(SW_WIDTH - 1 downto 0);
+    signal cw: STD_LOGIC_VECTOR(CW_WIDTH - 1 downto 0);
+    signal rfData: STD_LOGIC_VECTOR(15 downto 0);
+    signal btnCurr, btnPrev: STD_LOGIC;
     	
 begin
 
+    dp: signalAcquire_Datapath
+        PORT MAP(clk => clk,
+                 resetn => resetn,
+                 cw => cw,
+                 sw => sw(DATAPATH_SW_WIDTH - 1 downto 0),
+                 an7606data => an7606data,
+                 rfAddr => "000", --only read channel 1 ("000")
+                 rfData => rfData
+                 );
+    
+    cu: signalAcquire_Fsm
+        PORT MAP(clk => clk,
+                 resetn => resetn,
+                 sw => sw,
+                 cw => cw
+                 );
+                 
+    btnCurr <= btn(0);
+    
+    button_process: process(clk)  
+	begin
+		if (rising_edge(clk)) then
+			if (resetn = '0') then 
+				btnCurr <= '1';
+				btnPrev <= '1';
+			else 
+			    sw(START_CONV_SW_BIT_INDEX) <= btnCurr xor btnPrev;
+			end if;
+			btnPrev <= btnCurr;
+	    end if;
+	end process;
 
-	<complete>
+
+	an7606od <= "000"; --hard coded
  
 end behavior;
