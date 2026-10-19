@@ -155,7 +155,7 @@ begin
                 cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
                 cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
                 cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "10";
-                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
+                cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "11";
             
             when WAIT_TRIGGER_STATE =>
                 cw(CONVST_CW_BIT_INDEX)         <= '1';
@@ -164,7 +164,7 @@ begin
                 cw(RESET_AD7606_CW_BIT_INDEX)   <= '0';
                 cw(REG_FILE_WRITE_CW_BIT_INDEX) <= '0';
                 cw(REG_FILE_COUNTER_CW_INDEX + 1 downto REG_FILE_COUNTER_CW_INDEX)       <= "00";
-                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "00";
+                cw(SHORT_DELAY_COUNTER_CW_INDEX + 1 downto SHORT_DELAY_COUNTER_CW_INDEX) <= "11";
                 cw(LONG_DELAY_COUNTER_CW_INDEX + 1 downto LONG_DELAY_COUNTER_CW_INDEX)   <= "00";
                             
             when ASSERT_CONVSTART_STATE =>
