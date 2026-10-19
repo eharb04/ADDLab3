@@ -107,12 +107,19 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if (resetn = '0') then 
-				btnCurr <= '1';
-				btnPrev <= '1';
-			end if;
-			sw(START_CONV_SW_BIT_INDEX) <= '1' when (btnCurr = '1' and btnPrev = '0')
-			                               else '0';
+				btnPrev <= '0';
+				sw(START_CONV_SW_BIT_INDEX) <= '0';
+		    else
+		    
+		    if (btnCurr = '1' and btnPrev = '0') then
+		      sw(START_CONV_SW_BIT_INDEX) <= '1';
+		    else
+		      sw(START_CONV_SW_BIT_INDEX) <= '0';
+		    end if;
+--		    sw(START_CONV_SW_BIT_INDEX) <= '1' when (btnCurr = '1' and btnPrev = '0')
+--			                               else '0';
 			btnPrev <= btnCurr;
+			end if;
 	    end if;
 	end process;
  
