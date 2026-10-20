@@ -116,8 +116,7 @@ begin
 		    else
 		      sw(START_CONV_SW_BIT_INDEX) <= '0';
 		    end if;
---		    sw(START_CONV_SW_BIT_INDEX) <= '1' when (btnCurr = '1' and btnPrev = '0')
---			                               else '0';
+		    
 			btnPrev <= btnCurr;
 			end if;
 	    end if;
