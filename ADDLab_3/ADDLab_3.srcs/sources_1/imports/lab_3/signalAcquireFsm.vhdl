@@ -90,14 +90,16 @@ begin
 				        end if;
 				        
 				    when WAIT_VALID_DATA_STATE =>
-				        if (ALL_CHANNELS_HAVE_BEEN_READ_SW = '1') then
-				            state <= WAIT_TRIGGER_STATE;
-				        elsif (SHORT_DELAY_DONE_SW = '1') then
+				        if (SHORT_DELAY_DONE_SW = '1') then
 				            state <= LATCH_STATE;
 				        end if;
 				        
 				    when LATCH_STATE =>
-				        state <= PAUSE_BETWEEN_CHANNELS_STATE;
+				        if (ALL_CHANNELS_HAVE_BEEN_READ_SW = '1') then
+				            state <= WAIT_TRIGGER_STATE; --allow final read to channel 8
+				        else
+				            state <= PAUSE_BETWEEN_CHANNELS_STATE;
+				        end if;
 				        
 				    when PAUSE_BETWEEN_CHANNELS_STATE =>
 				        if (SHORT_DELAY_DONE_SW = '1') then
